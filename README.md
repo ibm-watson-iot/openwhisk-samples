@@ -1,4 +1,4 @@
-# udpro-visual-recognition-alpha
+# openwhisk-samples
 
 <figure><img src="resources/udprosolution.png"><figurecaption>Unstructured Data Processor in a nutshell</figurecaption></figure>   
 

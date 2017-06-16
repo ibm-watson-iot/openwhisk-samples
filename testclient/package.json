@@ -1,0 +1,22 @@
+{
+  "name" : "udpro-client",
+  "version" : "0.1.0",
+  "description" : "This is code for upload images to the Cloudant DB from the client devices like Drone, Raspberry Pi",
+  "main" : "upload.js",
+  "dependencies" : {
+    "cloudant" : "latest"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "node upload.js"
+  },
+  "keywords": [
+    "drone",
+    "bluemix",
+    "openwhisk",
+    "watson",
+    "iot"
+  ],
+  "author": "jeffdare",
+  "license": "EPL-1.0"
+}

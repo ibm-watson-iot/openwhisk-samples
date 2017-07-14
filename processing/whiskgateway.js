@@ -3,24 +3,27 @@
 /**
  * @param {Object} params
  * Details of the Gateway
- * @param {String} [params.orgId] The Organization ID 
+ * @param {String} [params.orgId] The Organization ID
  * @param {String} [params.domain] Domain name of the messaging host
  * @param {String} [params.gatewayTypeId] Gateway Type ID
  * @param {String} [params.gatewayId] Gateway ID
  * @param {String} [params.gatewayToken] Gateway Token
- * 
- * Details of the end device 
+ * [For advance security]
+ * @param {String} [params.cert] Gateway client certificate .pem file
+ * @param {String} [params.key] Gateway key for the client certrificate
+ *
+ * Details of the end device
  * @param {String} [params.typeId] Device Type Id
  * @param {String} [params.deviceId] Device Id
- * @param {String} [params.eventType] Event Type 
+ * @param {String} [params.eventType] Event Type
 
  * @param {String} [params.payload] Payload of the Event
- * @param {String} [params.docId] Doc Id of the Cloudant 
+ * @param {String} [params.docId] Doc Id of the Cloudant
  *
  * @return {Promise}
  */
  function main(params){
-    
+
     let errorMsg = paramsCheck(params);
     if(errorMsg) {
         return Promise.reject(errorMsg);
@@ -33,33 +36,44 @@
     return new Promise((resolve, reject) => {
 
       var uri = util.format(
-	  "https://%s.%s/api/v0002/device/types/%s/devices/%s/events/%s",
+	  "https://%s.%s:443/api/v0002/device/types/%s/devices/%s/events/%s",
 	  params.orgId, params.domain, params.typeId, params.deviceId ,
 	  params.eventType
 	  );
 
-        request.post({
-          headers: {
-              'content-type' : 'application/json',
-              'authorization' : 'Basic ' + new Buffer('g/'+params.orgId+'/'+ params.gatewayTypeId+'/'+ params.gatewayId + ':' + params.gatewayToken).toString('base64')
-          },
-          url:     uri,
-          body:   JSON.stringify({
-              result : params.payload,
-              docId : params.docId
-          })
-        }, function(error, response, body){
-            
-            if(!error){
-                resolve({body})
+    var postObj = {
+        headers: {
+          'content-type' : 'application/json',
+          'authorization' : 'Basic ' + new Buffer('g/'+params.orgId+'/'+ params.gatewayTypeId+'/'+ params.gatewayId + ':' + params.gatewayToken).toString('base64')
+        },
+        url: uri,
+        body: JSON.stringify(params.payload)
+      };
+    //Optional values no need to validate
+    if(params.cert && params.key ){
+        postObj.agentOptions= {
+          cert: params.cert ,
+          key: params.key,
+          securityOptions: 'SSL_OP_NO_SSLv3'
+        }
+      }
+
+    request.post(postObj, function(error, response, body){
+          if(!error){
+            if(response.statusCode === 200)
+            {
+              resolve({body})
             }else{
-				reject(error);
+              reject(response)
             }
+          }else{
+			        reject(error);
+          }
         });
 
     });
   }
-  
+
  /**
  *  Function to check if all the params are passed properly
  */
